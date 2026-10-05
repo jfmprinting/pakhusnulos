@@ -23,7 +23,8 @@ export default function WhatsAppStationView() {
     activeDay,
     selectedDate,
     setShowSettingsModal,
-    heroProducts
+    heroProducts,
+    userSettings
   } = useApp();
 
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -44,7 +45,7 @@ export default function WhatsAppStationView() {
 
   const activePlaybook = waPlaybook.find(w => w.day_name.toLowerCase() === activeDayName.toLowerCase()) || waPlaybook[0];
 
-  const hasGeminiKeys = loadGeminiKeys().length > 0;
+  const hasGeminiKeys = userSettings?.gemini_keys?.length > 0;
 
   // Product context for AI
   const productNames = heroProducts.map(p => p.name).join(', ');

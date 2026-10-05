@@ -139,6 +139,7 @@ export default function SettingsModal({ isOpen, onClose, initialTab = 'products'
     const updated = [...geminiKeys, trimmed];
     setGeminiKeys(updated);
     await saveGeminiKeys(updated);
+    updateUserSettings({ gemini_keys: updated });
     setNewGeminiKey('');
     setShowKeyInput(false);
   };
@@ -147,6 +148,7 @@ export default function SettingsModal({ isOpen, onClose, initialTab = 'products'
     const updated = geminiKeys.filter((_, i) => i !== idx);
     setGeminiKeys(updated);
     await saveGeminiKeys(updated);
+    updateUserSettings({ gemini_keys: updated });
     const newResults = { ...testResults };
     delete newResults[idx];
     setTestResults(newResults);

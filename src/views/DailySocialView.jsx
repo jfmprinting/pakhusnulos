@@ -24,7 +24,8 @@ export default function DailySocialView() {
     showToast,
     setShowSettingsModal,
     heroProducts,
-    weeklyClusters
+    weeklyClusters,
+    userSettings
   } = useApp();
 
   const [selectedAngle, setSelectedAngle] = useState('ALL');
@@ -38,7 +39,7 @@ export default function DailySocialView() {
   const [genStatus, setGenStatus] = useState('');
   const [captions, setCaptions] = useState({});
 
-  const hasGeminiKeys = loadGeminiKeys().length > 0;
+  const hasGeminiKeys = userSettings?.gemini_keys?.length > 0;
   const productNames = heroProducts.map(p => p.name).join(', ') || 'ModulAjar Online, BuatSoal Online';
 
   const buildCaptionPrompt = (item) => {
