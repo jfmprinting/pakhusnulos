@@ -126,11 +126,11 @@ export default function SettingsModal({ isOpen, onClose, initialTab = 'products'
   // Load Gemini keys when tab opens
   useEffect(() => {
     if (activeTab === 'api_keys' || isOpen) {
-      setGeminiKeys(loadGeminiKeys());
+      loadGeminiKeys().then(keys => setGeminiKeys(keys));
     }
   }, [activeTab, isOpen]);
 
-  const handleAddGeminiKey = () => {
+  const handleAddGeminiKey = async () => {
     const trimmed = newGeminiKey.trim();
     if (!trimmed) return;
     if (geminiKeys.includes(trimmed)) {
@@ -138,15 +138,15 @@ export default function SettingsModal({ isOpen, onClose, initialTab = 'products'
     }
     const updated = [...geminiKeys, trimmed];
     setGeminiKeys(updated);
-    saveGeminiKeys(updated);
+    await saveGeminiKeys(updated);
     setNewGeminiKey('');
     setShowKeyInput(false);
   };
 
-  const handleDeleteGeminiKey = (idx) => {
+  const handleDeleteGeminiKey = async (idx) => {
     const updated = geminiKeys.filter((_, i) => i !== idx);
     setGeminiKeys(updated);
-    saveGeminiKeys(updated);
+    await saveGeminiKeys(updated);
     const newResults = { ...testResults };
     delete newResults[idx];
     setTestResults(newResults);
@@ -1177,7 +1177,7 @@ export default function SettingsModal({ isOpen, onClose, initialTab = 'products'
                     <button onClick={handleAddGeminiKey} style={{ padding: '8px 16px', background: '#7C3AED', border: 'none', borderRadius: 'var(--radius-md)', color: '#fff', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}>Simpan</button>
                     <button onClick={() => { setShowKeyInput(false); setNewGeminiKey(''); }} style={{ padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', color: 'var(--text-secondary)', cursor: 'pointer' }}>Batal</button>
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Key disimpan di localStorage browser, tidak dikirim ke server.</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Key disimpan di Supabase, tersinkron antar perangkat.</div>
                 </div>
               )}
 

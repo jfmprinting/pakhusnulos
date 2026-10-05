@@ -2,17 +2,18 @@
  * Gemini AI Client - Multi API Key with Automatic Failover
  * Adapted from BuatSoal Online ai-generator pattern.
  *
- * STORAGE: Keys disimpan di localStorage ('ph_os_gemini_keys') dan Supabase user_settings.
+ * STORAGE: Keys disimpan di Supabase user_settings agar sinkron antar perangkat.
  * FAILOVER: Jika key 1 kena rate limit (429/403/503), otomatis coba key berikutnya.
  */
 
-const STORAGE_KEY = 'ph_os_gemini_keys';
+import { supabase } from './supabase';
+
+const DEFAULT_USER_ID = 'f1b1244e-5fa1-4214-9cc7-fffa3973f644';
 
 const DEFAULT_MODELS = [
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
   'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash',
 ];
 
 /** Build Gemini API URL with placeholder */
@@ -20,16 +21,21 @@ const geminiUrl = (model) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
 /**
- * Load API keys from localStorage.
+ * Load API keys from Supabase.
  * Returns array of clean, non-empty key strings.
  */
-export function loadGeminiKeys() {
+export async function loadGeminiKeys() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return parsed
+    const { data, error } = await supabase
+      .from('user_settings')
+      .select('gemini_keys')
+      .eq('user_id', DEFAULT_USER_ID)
+      .single();
+      
+    if (error || !data || !data.gemini_keys) return [];
+    
+    if (Array.isArray(data.gemini_keys)) {
+      return data.gemini_keys
         .map((k) => (typeof k === 'string' ? k.trim() : ''))
         .filter((k) => k.length > 0);
     }
@@ -40,13 +46,17 @@ export function loadGeminiKeys() {
 }
 
 /**
- * Save API keys to localStorage.
+ * Save API keys to Supabase.
  */
-export function saveGeminiKeys(keys) {
+export async function saveGeminiKeys(keys) {
   const clean = keys
     .map((k) => (typeof k === 'string' ? k.trim() : ''))
     .filter((k) => k.length > 0);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+    
+  await supabase
+    .from('user_settings')
+    .update({ gemini_keys: clean })
+    .eq('user_id', DEFAULT_USER_ID);
 }
 
 /**
@@ -79,20 +89,25 @@ async function fetchWithKey(model, key, body) {
  */
 export async function generateWithGemini(prompt, options = {}) {
   const {
-    keys = loadGeminiKeys(),
+    keys = null,
     models = DEFAULT_MODELS,
     temperature = 0.7,
     onStatus = (msg) => console.log('[Gemini]', msg),
     systemInstruction = null,
   } = options;
 
-  if (!keys || keys.length === 0) {
+  let activeKeys = keys;
+  if (!activeKeys) {
+    activeKeys = await loadGeminiKeys();
+  }
+
+  if (!activeKeys || activeKeys.length === 0) {
     throw new Error(
       'Tidak ada Gemini API Key tersimpan. Tambahkan minimal 1 API key di menu Pengaturan > API Keys.'
     );
   }
 
-  const cleanKeys = keys
+  const cleanKeys = activeKeys
     .map((k) => (typeof k === 'string' ? k.trim() : ''))
     .filter((k) => k.length > 0);
 
@@ -169,7 +184,7 @@ export async function testGeminiKey(key) {
       temperature: 0,
       onStatus: () => {},
     });
-    return { ok: true, model: 'gemini-2.5-flash', response: text };
+    return { ok: true, model: 'gemini-3.5-flash', response: text };
   } catch (err) {
     return { ok: false, error: err.message };
   }

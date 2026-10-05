@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS public.user_settings (
   affiliate_rate NUMERIC NOT NULL DEFAULT 0.40,
   monthly_fixed_cost NUMERIC NOT NULL DEFAULT 742000,
   weekly_gross_target NUMERIC NOT NULL DEFAULT 0,
+  gemini_keys JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
