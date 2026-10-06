@@ -48,8 +48,13 @@ export function AppProvider({ children }) {
   const [dailyLogs, setDailyLogs] = useState([]);
   const [focusSessions, setFocusSessions] = useState([]);
 
-  // Active Selected Date (default to plan start date: 2026-10-05)
-  const [selectedDate, setSelectedDate] = useState('2026-10-05');
+  // Active Selected Date (default to today's local date)
+  const getLocalDate = () => {
+    const d = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const [selectedDate, setSelectedDate] = useState(getLocalDate());
   const [currentView, setCurrentView] = useState('dashboard');
   
   // Modals

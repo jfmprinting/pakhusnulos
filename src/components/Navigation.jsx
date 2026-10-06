@@ -245,9 +245,30 @@ export function TopHeader() {
           >
             <ChevronLeft size={16} />
           </button>
-          <span className="font-mono" style={{ fontSize: '12px', fontWeight: 600, padding: '0 4px', color: 'var(--text-primary)' }}>
-            {selectedDate} ({activeDay ? activeDay.day_name.slice(0, 3) : ''})
-          </span>
+          
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', cursor: 'pointer', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.3)' }} title="Pilih Tanggal dari Kalender">
+            <CalendarDays size={14} color="var(--color-revenue)" style={{ marginRight: '6px' }} />
+            <span className="font-mono" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-revenue)' }}>
+              {selectedDate} {activeDay ? `(${activeDay.day_name.slice(0, 3)})` : ''}
+            </span>
+            <input 
+              type="date" 
+              value={selectedDate}
+              onChange={(e) => {
+                if (e.target.value) setSelectedDate(e.target.value);
+              }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                opacity: 0,
+                cursor: 'pointer'
+              }}
+            />
+          </div>
+
           <button
             onClick={() => handleDateChange('next')}
             style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', padding: '4px', cursor: 'pointer', borderRadius: '4px' }}
@@ -258,11 +279,15 @@ export function TopHeader() {
         </div>
 
         <button
-          onClick={() => setSelectedDate('2026-10-05')}
+          onClick={() => {
+            const d = new Date();
+            const pad = (n) => n.toString().padStart(2, '0');
+            setSelectedDate(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`);
+          }}
           className="btn-secondary desktop-only"
           style={{ fontSize: '11px', padding: '5px 8px' }}
         >
-          Start 05 Okt
+          Hari Ini
         </button>
       </div>
 
